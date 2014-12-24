@@ -4,7 +4,7 @@ A caching extension for IQueryable with Query Notifications invalidation support
 
 Download the appropiate .dll for your target platform (.Net 3.5 or .Net 4.0) and add it as a reference to your project. Now you can use the `AsCached()` method extension on any IQueryable:
 
-```
+```C#
 var queryTags = from t in ctx.Tags select t;
 var tags = queryTags.AsCached("Tags");
 foreach (Tag t in tags)
@@ -17,7 +17,7 @@ foreach (Tag t in tags)
 
 Query Notifications are a SQL Server 2005 and forward feature that allows the client to subscribe for receiving notifications when the result of a query has changed due to updates on the server. Say user Alice submits a query like 
 
-```
+```SQL
 SELECT PersonID, FirstName, LastName 
 FROM dbo.People
 ```
@@ -28,15 +28,15 @@ The typical way of using Query Notification is to use the [`SqlDependency`](http
 
 For a more detailed explanation how Query Notification work inside SQL Server I recommend this blog article [The Mysterious Notification](http://rusanu.com/2006/06/17/the-mysterious-notification).
 
-# How does !LinqToCache Work
+# How does LinqToCache Work
 
-LinqToCache adds the `AsCached` extension method to the `IQueryable` interface. When the `IQueryable<T>` is first iterated, the !LinqToCache library adds a !SqlDependency object on the query submitted to SQL Server. Subsequent requests for the same type T with the same caching keys will be returned from a cached copy of the result. When the !SqlDependency receives an invalidation notification the cached result is invalidated. The next iteration of an `IQueryable` will again submit the query to the SQL Server and fetch a new result.
+LinqToCache adds the `AsCached` extension method to the `IQueryable` interface. When the `IQueryable<T>` is first iterated, the LinqToCache library adds a SqlDependency object on the query submitted to SQL Server. Subsequent requests for the same type T with the same caching keys will be returned from a cached copy of the result. When the SqlDependency receives an invalidation notification the cached result is invalidated. The next iteration of an `IQueryable` will again submit the query to the SQL Server and fetch a new result.
 
 # Getting notified on invalidation
 
-If you wish to get a callback in the application when the !LinqToCache query result is notified you can submit an optional `CachedQueryOptions` argument to the `AsCached` call. The `OnInvalidated` event on this optional argument will be raised when the !SqlDependency has notification has fired, in other words when the query was notified by the SQL Server because data was updated by another user:
+If you wish to get a callback in the application when the LinqToCache query result is notified you can submit an optional `CachedQueryOptions` argument to the `AsCached` call. The `OnInvalidated` event on this optional argument will be raised when the SqlDependency has notification has fired, in other words when the query was notified by the SQL Server because data was updated by another user:
 
-```
+```C#
 var queryTags = from t in ctx.Tags select t;
 var tags = queryTags.AsCached("Tags", new QueryCachedOptions () {
   OnInvalidate = (sender, args) => {
@@ -63,4 +63,4 @@ Not any query can be marked for Query Notifications. The full list of restrictio
 
 If the query is invalid for notifications the `OnInvalidated` event will be called immediately with an `Source` of value `SqlNotificationSource.Statement` and an `Info` of value `SqlNotificationInfo.Invalid`.
 
-Most !LinqToSQL queries are valid for notifications as long as the table name is the schema qualified two-part name: that is the `TableAttribute` on the class is `schema.TableName`, not only `TableName`. However, some popular LINQ operators are not supported for notifications,  like `Skip()` and `Take()`.
+Most LinqToSQL queries are valid for notifications as long as the table name is the schema qualified two-part name: that is the `TableAttribute` on the class is `schema.TableName`, not only `TableName`. However, some popular LINQ operators are not supported for notifications,  like `Skip()` and `Take()`.

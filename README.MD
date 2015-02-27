@@ -64,3 +64,7 @@ Not any query can be marked for Query Notifications. The full list of restrictio
 If the query is invalid for notifications the `OnInvalidated` event will be called immediately with an `Source` of value `SqlNotificationSource.Statement` and an `Info` of value `SqlNotificationInfo.Invalid`.
 
 Most LinqToSQL queries are valid for notifications as long as the table name is the schema qualified two-part name: that is the `TableAttribute` on the class is `schema.TableName`, not only `TableName`. However, some popular LINQ operators are not supported for notifications,  like `Skip()` and `Take()`.
+
+## EntityFramework Cache Consideration
+
+EF has its own caching and when adding LinqToCache to an EF Context returned result set, the EF cache may return stale results even after LinqToCache was notified of an update. In such cases your application should first refresh the context, for example using [`ObjectContext.Refresh`](https://msdn.microsoft.com/en-us/library/bb896255.aspx), when notified of a change. 

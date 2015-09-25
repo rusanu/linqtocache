@@ -13,7 +13,7 @@ foreach (Tag t in tags)
 }
 ```
 
-# How do Query Notification work
+# How do Query Notifications work
 
 Query Notifications are a SQL Server 2005 and forward feature that allows the client to subscribe for receiving notifications when the result of a query has changed due to updates on the server. Say user Alice submits a query like 
 
